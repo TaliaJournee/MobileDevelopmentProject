@@ -1,2 +1,0 @@
-# MobileDevelopmentProject
-Talia Journée
