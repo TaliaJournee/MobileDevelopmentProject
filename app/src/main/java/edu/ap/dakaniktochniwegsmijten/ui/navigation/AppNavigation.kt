@@ -1,7 +1,6 @@
 package edu.ap.dakaniktochniwegsmijten.ui.navigation
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,7 +11,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -37,12 +35,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.ap.dakaniktochniwegsmijten.R
+import edu.ap.dakaniktochniwegsmijten.data.user.UserRole
 import edu.ap.dakaniktochniwegsmijten.ui.auth.LoginScreen
+import edu.ap.dakaniktochniwegsmijten.ui.auth.SessionStatusScreen
 import edu.ap.dakaniktochniwegsmijten.ui.auth.SessionViewModel
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
 
 private const val SESSION_ROUTE = "session"
 private const val LOGIN_ROUTE = "login"
+private const val MERCHANT_ROUTE = "merchant"
 
 private enum class CustomerDestination(
     val route: String,
@@ -68,44 +69,57 @@ fun AppNavigation(
     var lastUserId by rememberSaveable {
         mutableStateOf<String?>(null)
     }
+    var lastTargetRoute by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
 
-    LaunchedEffect(sessionState.isLoading, sessionState.userId) {
-        if (!sessionState.isLoading) {
-            val isInitialNavigation =
-                navController.currentDestination?.route == SESSION_ROUTE
-            val hasUserChanged = lastUserId != sessionState.userId
+    val targetRoute = when {
+        sessionState.isLoading -> SESSION_ROUTE
+        sessionState.userId == null -> LOGIN_ROUTE
+        sessionState.isProfileLoading -> SESSION_ROUTE
+        sessionState.profileErrorRes != null -> SESSION_ROUTE
+        sessionState.profile == null -> SESSION_ROUTE
+        sessionState.profile?.role == UserRole.CUSTOMER ->
+            CustomerDestination.Discover.route
+        else -> MERCHANT_ROUTE
+    }
 
-            if (isInitialNavigation || hasUserChanged) {
-                CustomerDestination.entries.forEach { destination ->
-                    navController.clearBackStack(destination.route)
-                }
+    LaunchedEffect(sessionState.userId, targetRoute) {
+        val hasUserChanged = lastUserId != sessionState.userId
+        val hasTargetChanged = lastTargetRoute != targetRoute
 
-                val targetRoute = if (sessionState.userId == null) {
-                    LOGIN_ROUTE
-                } else {
-                    CustomerDestination.Discover.route
-                }
-
-                navController.navigate(targetRoute) {
-                    popUpTo(navController.graph.id) {
-                        inclusive = false
-                        saveState = false
-                    }
-                    launchSingleTop = true
-                }
-
-                lastUserId = sessionState.userId
+        if (hasUserChanged || hasTargetChanged) {
+            CustomerDestination.entries.forEach { destination ->
+                navController.clearBackStack(destination.route)
             }
+
+            navController.navigate(targetRoute) {
+                popUpTo(navController.graph.id) {
+                    inclusive = false
+                    saveState = false
+                }
+                launchSingleTop = true
+            }
+
+            lastUserId = sessionState.userId
+            lastTargetRoute = targetRoute
         }
     }
 
+    val isCustomerReady =
+        targetRoute == CustomerDestination.Discover.route
+    val isMerchantReady = targetRoute == MERCHANT_ROUTE
+
     val showCustomerNavigation =
-        !sessionState.isLoading &&
-                sessionState.userId != null &&
+        isCustomerReady &&
                 CustomerDestination.entries.any { it.route == currentRoute }
 
+    val showSignOut =
+        showCustomerNavigation ||
+                (isMerchantReady && currentRoute == MERCHANT_ROUTE)
+
     Column(modifier = modifier.fillMaxSize()) {
-        if (showCustomerNavigation) {
+        if (showSignOut) {
             TextButton(
                 onClick = sessionViewModel::signOut,
                 modifier = Modifier
@@ -122,37 +136,49 @@ fun AppNavigation(
             modifier = Modifier.weight(1f)
         ) {
             composable(SESSION_ROUTE) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(
-                        space = 16.dp,
-                        alignment = Alignment.CenterVertically
-                    ),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Text(stringResource(R.string.session_loading))
+                if (targetRoute == SESSION_ROUTE) {
+                    SessionStatusScreen(
+                        uiState = sessionState,
+                        onRetry = sessionViewModel::retryProfile,
+                        onSignOut = sessionViewModel::signOut
+                    )
                 }
             }
 
             composable(LOGIN_ROUTE) {
-                LoginScreen()
+                if (targetRoute == LOGIN_ROUTE) {
+                    LoginScreen()
+                }
             }
 
             composable(CustomerDestination.Discover.route) {
-                PlaceholderScreen(R.string.nav_discover)
+                if (isCustomerReady) {
+                    PlaceholderScreen(R.string.nav_discover)
+                }
             }
 
             composable(CustomerDestination.Map.route) {
-                MapScreen()
+                if (isCustomerReady) {
+                    MapScreen()
+                }
             }
 
             composable(CustomerDestination.Orders.route) {
-                PlaceholderScreen(R.string.nav_orders)
+                if (isCustomerReady) {
+                    PlaceholderScreen(R.string.nav_orders)
+                }
             }
 
             composable(CustomerDestination.Favorites.route) {
-                PlaceholderScreen(R.string.nav_favorites)
+                if (isCustomerReady) {
+                    PlaceholderScreen(R.string.nav_favorites)
+                }
+            }
+
+            composable(MERCHANT_ROUTE) {
+                if (isMerchantReady) {
+                    PlaceholderScreen(R.string.merchant_home_title)
+                }
             }
         }
 

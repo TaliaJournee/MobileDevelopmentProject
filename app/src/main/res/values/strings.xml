@@ -21,4 +21,8 @@
     <string name="session_loading">Sessie controleren…</string>
     <string name="sign_out">Uitloggen</string>
     <string name="session_error_profile">Je profiel kon niet worden geladen. Controleer je verbinding en probeer opnieuw.</string>
+    <string name="session_profile_loading">Je profiel laden…</string>
+    <string name="session_profile_missing">Je account heeft nog geen profiel.</string>
+    <string name="session_retry">Opnieuw proberen</string>
+    <string name="merchant_home_title">Mijn winkel</string>
 </resources>
