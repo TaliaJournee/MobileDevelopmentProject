@@ -55,4 +55,6 @@ dependencies {
     implementation(libs.osmdroid.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
 }
