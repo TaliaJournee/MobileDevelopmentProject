@@ -13,4 +13,9 @@
     <string name="login_error_network">Verbinding mislukt. Controleer je internetverbinding en probeer opnieuw.</string>
     <string name="login_error_too_many_requests">Te veel aanmeldpogingen. Probeer het later opnieuw.</string>
     <string name="login_error_unknown">Inloggen is niet gelukt. Probeer opnieuw.</string>
+    <string name="login_title">Inloggen</string>
+    <string name="login_email">E-mailadres</string>
+    <string name="login_password">Wachtwoord</string>
+    <string name="login_submit">Inloggen</string>
+    <string name="login_loading">Bezig met inloggen…</string>
 </resources>

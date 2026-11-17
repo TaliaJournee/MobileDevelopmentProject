@@ -23,13 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.ap.dakaniktochniwegsmijten.R
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
+import edu.ap.dakaniktochniwegsmijten.ui.auth.LoginScreen
+
+private const val LOGIN_ROUTE = "login"
 
 private enum class CustomerDestination(
     val route: String,
@@ -51,9 +53,21 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
-            startDestination = CustomerDestination.Discover.route,
+            startDestination = LOGIN_ROUTE,
             modifier = Modifier.weight(1f)
         ) {
+            composable(LOGIN_ROUTE) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(CustomerDestination.Discover.route) {
+                            popUpTo(LOGIN_ROUTE) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
             composable(CustomerDestination.Discover.route) {
                 PlaceholderScreen(R.string.nav_discover)
             }
@@ -71,31 +85,33 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             }
         }
 
-        NavigationBar(
-            windowInsets = WindowInsets(0, 0, 0, 0)
-        ) {
-            CustomerDestination.entries.forEach { destination ->
-                NavigationBarItem(
-                    selected = currentRoute == destination.route,
-                    onClick = {
-                        navController.navigate(destination.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+        if (CustomerDestination.entries.any { it.route == currentRoute }) {
+            NavigationBar(
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            ) {
+                CustomerDestination.entries.forEach { destination ->
+                    NavigationBarItem(
+                        selected = currentRoute == destination.route,
+                        onClick = {
+                            navController.navigate(destination.route) {
+                                popUpTo(CustomerDestination.Discover.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = destination.icon,
+                                contentDescription = null
+                            )
+                        },
+                        label = {
+                            Text(stringResource(destination.labelRes))
                         }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = destination.icon,
-                            contentDescription = null
-                        )
-                    },
-                    label = {
-                        Text(stringResource(destination.labelRes))
-                    }
-                )
+                    )
+                }
             }
         }
     }
