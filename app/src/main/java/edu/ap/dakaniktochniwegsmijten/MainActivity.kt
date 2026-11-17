@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.Modifier
-import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
+import edu.ap.dakaniktochniwegsmijten.ui.navigation.AppNavigation
 import org.osmdroid.config.Configuration
 import java.io.File
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import edu.ap.dakaniktochniwegsmijten.ui.theme.DaKanIkTochNiWegsmijtenTheme
+
 
 class MainActivity : ComponentActivity() {
 
@@ -61,7 +62,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(16.dp)
                         )
 
-                        MapScreen(
+                        AppNavigation(
                             modifier = Modifier.weight(1f)
                         )
                     }
