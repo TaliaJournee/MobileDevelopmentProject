@@ -20,4 +20,5 @@
     <string name="login_loading">Bezig met inloggen…</string>
     <string name="session_loading">Sessie controleren…</string>
     <string name="sign_out">Uitloggen</string>
+    <string name="session_error_profile">Je profiel kon niet worden geladen. Controleer je verbinding en probeer opnieuw.</string>
 </resources>
