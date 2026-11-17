@@ -30,6 +30,17 @@ class AuthRepository(
         ).await()
     }
 
+    suspend fun createAccount(email: String, password: String): String {
+        val result = auth.createUserWithEmailAndPassword(
+            email.trim(),
+            password
+        ).await()
+
+        return checkNotNull(result.user) {
+            "Account creation completed without a user."
+        }.uid
+    }
+
     fun signOut() {
         auth.signOut()
     }
