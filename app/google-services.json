@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "250960346553",
+    "project_id": "da-kan-ik-toch-ni-wegsmijten",
+    "storage_bucket": "da-kan-ik-toch-ni-wegsmijten.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:250960346553:android:b7fe0daca739843c7fca68",
+        "android_client_info": {
+          "package_name": "edu.ap.dakaniktochniwegsmijten"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_iKSBS2QJRq_wG4rTbHV7oK6GcG_n-i8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
