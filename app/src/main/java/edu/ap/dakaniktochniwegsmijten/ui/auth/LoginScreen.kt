@@ -33,7 +33,6 @@ import edu.ap.dakaniktochniwegsmijten.R
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel()
 ) {
@@ -44,7 +43,6 @@ fun LoginScreen(
     LaunchedEffect(uiState.isSignedIn) {
         if (uiState.isSignedIn) {
             focusManager.clearFocus()
-            onLoginSuccess()
         }
     }
 

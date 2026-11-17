@@ -18,4 +18,6 @@
     <string name="login_password">Wachtwoord</string>
     <string name="login_submit">Inloggen</string>
     <string name="login_loading">Bezig met inloggen…</string>
+    <string name="session_loading">Sessie controleren…</string>
+    <string name="sign_out">Uitloggen</string>
 </resources>
