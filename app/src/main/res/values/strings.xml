@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Da kan ik toch ni wegsmijten</string>
+    <string name="nav_discover">Ontdekken</string>
+    <string name="nav_map">Kaart</string>
+    <string name="nav_orders">Bestellingen</string>
+    <string name="nav_favorites">Favorieten</string>
 </resources>

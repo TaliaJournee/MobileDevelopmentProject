@@ -1,0 +1,117 @@
+package edu.ap.dakaniktochniwegsmijten.ui.navigation
+
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import edu.ap.dakaniktochniwegsmijten.R
+import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
+
+private enum class CustomerDestination(
+    val route: String,
+    @StringRes val labelRes: Int,
+    val icon: ImageVector
+) {
+    Discover("discover", R.string.nav_discover, Icons.Default.Search),
+    Map("map", R.string.nav_map, Icons.Default.LocationOn),
+    Orders("orders", R.string.nav_orders, Icons.Default.ShoppingCart),
+    Favorites("favorites", R.string.nav_favorites, Icons.Default.Favorite)
+}
+
+@Composable
+fun AppNavigation(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    Column(modifier = modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = CustomerDestination.Discover.route,
+            modifier = Modifier.weight(1f)
+        ) {
+            composable(CustomerDestination.Discover.route) {
+                PlaceholderScreen(R.string.nav_discover)
+            }
+
+            composable(CustomerDestination.Map.route) {
+                MapScreen()
+            }
+
+            composable(CustomerDestination.Orders.route) {
+                PlaceholderScreen(R.string.nav_orders)
+            }
+
+            composable(CustomerDestination.Favorites.route) {
+                PlaceholderScreen(R.string.nav_favorites)
+            }
+        }
+
+        NavigationBar(
+            windowInsets = WindowInsets(0, 0, 0, 0)
+        ) {
+            CustomerDestination.entries.forEach { destination ->
+                NavigationBarItem(
+                    selected = currentRoute == destination.route,
+                    onClick = {
+                        navController.navigate(destination.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = destination.icon,
+                            contentDescription = null
+                        )
+                    },
+                    label = {
+                        Text(stringResource(destination.labelRes))
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaceholderScreen(@StringRes titleRes: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(titleRes),
+            style = MaterialTheme.typography.headlineSmall
+        )
+    }
+}
