@@ -5,4 +5,12 @@
     <string name="nav_map">Kaart</string>
     <string name="nav_orders">Bestellingen</string>
     <string name="nav_favorites">Favorieten</string>
+    <string name="login_error_email_required">Vul je e-mailadres in.</string>
+    <string name="login_error_email_invalid">Vul een geldig e-mailadres in.</string>
+    <string name="login_error_password_required">Vul je wachtwoord in.</string>
+    <string name="login_error_credentials">Het e-mailadres of wachtwoord is onjuist.</string>
+    <string name="login_error_account_disabled">Dit account is uitgeschakeld.</string>
+    <string name="login_error_network">Verbinding mislukt. Controleer je internetverbinding en probeer opnieuw.</string>
+    <string name="login_error_too_many_requests">Te veel aanmeldpogingen. Probeer het later opnieuw.</string>
+    <string name="login_error_unknown">Inloggen is niet gelukt. Probeer opnieuw.</string>
 </resources>
