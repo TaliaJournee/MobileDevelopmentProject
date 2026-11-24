@@ -36,4 +36,6 @@
     <string name="register_error_weak_password">Dit wachtwoord voldoet niet aan de wachtwoordvereisten. Kies een sterker wachtwoord.</string>
     <string name="register_error_unknown">Je account aanmaken is niet gelukt. Probeer opnieuw.</string>
     <string name="register_error_profile_save">Je account is aangemaakt, maar je profiel kon niet worden opgeslagen. Probeer opnieuw.</string>
+    <string name="register_submit">Account aanmaken</string>
+    <string name="register_submitting">Account aanmaken…</string>
 </resources>

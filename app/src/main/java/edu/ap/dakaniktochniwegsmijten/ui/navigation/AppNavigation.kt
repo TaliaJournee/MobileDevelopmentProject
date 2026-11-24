@@ -64,6 +64,7 @@ fun AppNavigation(
     sessionViewModel: SessionViewModel = viewModel()
 ) {
     val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    val registrationState by sessionViewModel.registrationState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -124,6 +125,7 @@ fun AppNavigation(
         if (showSignOut) {
             TextButton(
                 onClick = sessionViewModel::signOut,
+                enabled = !registrationState.isSubmitting,
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(horizontal = 8.dp)
@@ -141,6 +143,7 @@ fun AppNavigation(
                 if (targetRoute == SESSION_ROUTE) {
                     SessionStatusScreen(
                         uiState = sessionState,
+                        registrationState = registrationState,
                         onRetry = sessionViewModel::retryProfile,
                         onSignOut = sessionViewModel::signOut
                     )
@@ -161,7 +164,10 @@ fun AppNavigation(
 
             composable(REGISTER_ROUTE) {
                 if (targetRoute == LOGIN_ROUTE) {
-                    RegisterScreen()
+                    RegisterScreen(
+                        registrationState = registrationState,
+                        onRegister = sessionViewModel::register
+                    )
                 }
             }
 

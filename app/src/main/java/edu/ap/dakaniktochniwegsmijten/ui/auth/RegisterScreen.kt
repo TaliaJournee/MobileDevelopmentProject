@@ -30,9 +30,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.ap.dakaniktochniwegsmijten.R
 import edu.ap.dakaniktochniwegsmijten.data.user.UserRole
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 fun RegisterScreen(
+    registrationState: RegistrationUiState,
+    onRegister: (RegisterUiState) -> Unit,
     modifier: Modifier = Modifier,
     registerViewModel: RegisterViewModel = viewModel()
 ) {
@@ -40,6 +46,17 @@ fun RegisterScreen(
     val showNameError = uiState.name.isNotEmpty() && !uiState.isNameValid
     val showEmailError = uiState.email.isNotEmpty() && !uiState.isEmailValid
     val showPasswordError = uiState.password.isNotEmpty() && !uiState.isPasswordValid
+    val focusManager = LocalFocusManager.current
+    val canEdit = !registrationState.isSubmitting
+    val canSubmit = canEdit &&
+            uiState.isNameValid &&
+            uiState.isEmailValid &&
+            uiState.isPasswordValid &&
+            uiState.role != null
+
+    BackHandler(enabled = registrationState.isSubmitting) {
+        // Keep the form open while account creation is in progress.
+    }
 
     Column(
         modifier = modifier
@@ -60,6 +77,7 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.register_name)) },
             singleLine = true,
+            enabled = canEdit,
             isError = showNameError,
             supportingText = if (showNameError) {
                 { Text(stringResource(R.string.register_error_name)) }
@@ -75,6 +93,7 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.login_email)) },
             singleLine = true,
+            enabled = canEdit,
             isError = showEmailError,
             supportingText = if (showEmailError) {
                 { Text(stringResource(R.string.login_error_email_invalid)) }
@@ -93,6 +112,7 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.login_password)) },
             singleLine = true,
+            enabled = canEdit,
             isError = showPasswordError,
             supportingText = if (showPasswordError) {
                 { Text(stringResource(R.string.register_error_password_short)) }
@@ -124,6 +144,7 @@ fun RegisterScreen(
                         .fillMaxWidth()
                         .selectable(
                             selected = selected,
+                            enabled = canEdit,
                             role = Role.RadioButton,
                             onClick = { registerViewModel.selectRole(role) }
                         )
@@ -131,10 +152,43 @@ fun RegisterScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    RadioButton(selected = selected, onClick = null)
+                    RadioButton(
+                        selected = selected,
+                        onClick = null,
+                        enabled = canEdit
+                    )
                     Text(stringResource(labelRes))
                 }
             }
+        }
+        registrationState.errorRes?.let { errorRes ->
+            Text(
+                text = stringResource(errorRes),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        Button(
+            onClick = {
+                focusManager.clearFocus()
+                onRegister(uiState)
+            },
+            enabled = canSubmit,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                stringResource(
+                    if (registrationState.isSubmitting) {
+                        R.string.register_submitting
+                    } else {
+                        R.string.register_submit
+                    }
+                )
+            )
+        }
+
+        if (registrationState.isSubmitting) {
+            CircularProgressIndicator()
         }
     }
 }

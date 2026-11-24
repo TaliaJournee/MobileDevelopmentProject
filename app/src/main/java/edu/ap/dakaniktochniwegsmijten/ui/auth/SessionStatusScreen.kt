@@ -22,12 +22,14 @@ import edu.ap.dakaniktochniwegsmijten.R
 @Composable
 fun SessionStatusScreen(
     uiState: SessionUiState,
+    registrationState: RegistrationUiState,
     onRetry: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isLoading = uiState.isLoading || uiState.isProfileLoading
-
+    val isLoading = uiState.isLoading ||
+            uiState.isProfileLoading ||
+            registrationState.isSubmitting
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -44,16 +46,22 @@ fun SessionStatusScreen(
 
             Text(
                 text = stringResource(
-                    if (uiState.isLoading) {
-                        R.string.session_loading
-                    } else {
-                        R.string.session_profile_loading
+                    when {
+                        registrationState.isSubmitting -> R.string.register_submitting
+                        uiState.isLoading -> R.string.session_loading
+                        else -> R.string.session_profile_loading
                     }
                 ),
                 textAlign = TextAlign.Center
             )
         } else {
-            val errorRes = uiState.profileErrorRes
+            val errorRes = if (
+                registrationState.errorRes == R.string.register_error_profile_save
+            ) {
+                R.string.register_error_profile_save
+            } else {
+                uiState.profileErrorRes
+            }
 
             Text(
                 text = stringResource(
@@ -73,7 +81,10 @@ fun SessionStatusScreen(
         }
 
         if (uiState.userId != null) {
-            TextButton(onClick = onSignOut) {
+            TextButton(
+                onClick = onSignOut,
+                enabled = !registrationState.isSubmitting
+            ) {
                 Text(stringResource(R.string.sign_out))
             }
         }
