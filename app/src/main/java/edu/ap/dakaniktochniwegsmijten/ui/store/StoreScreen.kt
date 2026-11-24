@@ -18,13 +18,43 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.ap.dakaniktochniwegsmijten.R
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
+import edu.ap.dakaniktochniwegsmijten.ui.map.MapViewModel
 
 @Composable
 fun StoreScreen(
     modifier: Modifier = Modifier,
-    storeViewModel: StoreViewModel = viewModel()
+    storeViewModel: StoreViewModel = viewModel(),
+    mapViewModel: MapViewModel = viewModel()
 ) {
     val uiState by storeViewModel.uiState.collectAsStateWithLifecycle()
+    var isChoosingLocation by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler(enabled = isChoosingLocation) {
+        isChoosingLocation = false
+    }
+
+    if (isChoosingLocation) {
+        Column(modifier = modifier.fillMaxSize()) {
+            TextButton(onClick = { isChoosingLocation = false }) {
+                Text(stringResource(R.string.store_back_to_form))
+            }
+
+            MapScreen(
+                modifier = Modifier.weight(1f),
+                mapViewModel = mapViewModel
+            )
+        }
+        return
+    }
+
+    val mapUiState by mapViewModel.uiState.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -53,5 +83,25 @@ fun StoreScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+
+        val latitude = mapUiState.selectedLatitude
+        val longitude = mapUiState.selectedLongitude
+
+        if (latitude != null && longitude != null) {
+            Text(
+                text = stringResource(
+                    R.string.store_selected_coordinates,
+                    latitude,
+                    longitude
+                )
+            )
+        }
+
+        Button(
+            onClick = { isChoosingLocation = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.store_choose_location))
+        }
     }
 }

@@ -48,4 +48,7 @@
     <string name="map_location_unavailable">Geen toestelpositie gevonden. Probeer opnieuw of plaats zelf een pin.</string>
     <string name="store_name_label">Winkelnaam</string>
     <string name="store_category_label">Categorie</string>
+    <string name="store_choose_location">Kies winkellocatie op de kaart</string>
+    <string name="store_back_to_form">Terug naar mijn winkel</string>
+    <string name="store_selected_coordinates">Winkellocatie: %1$.5f, %2$.5f</string>
 </resources>
