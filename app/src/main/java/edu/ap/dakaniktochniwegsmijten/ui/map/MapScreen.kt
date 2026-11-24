@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import edu.ap.dakaniktochniwegsmijten.R
 import org.osmdroid.views.overlay.Marker
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
 
 private enum class LocationAccess {
     NONE,
@@ -159,6 +161,21 @@ fun MapScreen(
     val selectedLatitude = uiState.selectedLatitude
     val selectedLongitude = uiState.selectedLongitude
 
+    LaunchedEffect(
+        mapView,
+        uiState.shouldCenterOnSelection,
+        selectedLatitude,
+        selectedLongitude
+    ) {
+        if (uiState.shouldCenterOnSelection &&
+            selectedLatitude != null &&
+            selectedLongitude != null
+        ) {
+            mapView.controller.setCenter(GeoPoint(selectedLatitude, selectedLongitude))
+            mapViewModel.onSelectionCentered()
+        }
+    }
+
     if (selectedLatitude != null && selectedLongitude != null) {
         DisposableEffect(mapView, selectedLatitude, selectedLongitude) {
             val marker = Marker(mapView).apply {
@@ -210,6 +227,41 @@ fun MapScreen(
         if (statusRes != null) {
             Text(
                 text = stringResource(statusRes),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+
+        if (locationAccess != LocationAccess.NONE) {
+            Button(
+                onClick = mapViewModel::useDeviceLocation,
+                enabled = !uiState.isLocating,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    stringResource(
+                        if (uiState.isLocating) {
+                            R.string.map_locating
+                        } else {
+                            R.string.map_use_device_location
+                        }
+                    )
+                )
+            }
+        }
+
+        if (uiState.isLocating) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+        }
+
+        if (uiState.locationUnavailable) {
+            Text(
+                text = stringResource(R.string.map_location_unavailable),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
