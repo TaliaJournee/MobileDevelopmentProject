@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
+import edu.ap.dakaniktochniwegsmijten.data.user.UserProfile
+import edu.ap.dakaniktochniwegsmijten.data.user.UserRole
 
 class AuthRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -30,15 +32,40 @@ class AuthRepository(
         ).await()
     }
 
-    suspend fun createAccount(email: String, password: String): String {
+    suspend fun createAccount(
+        name: String,
+        email: String,
+        password: String,
+        role: UserRole
+    ): UserProfile {
+        val trimmedName = name.trim()
+        val trimmedEmail = email.trim()
+
+        require(trimmedName.length in 1..100) {
+            "Name must contain between 1 and 100 characters."
+        }
+        require(trimmedEmail.length in 1..254) {
+            "Email must contain between 1 and 254 characters."
+        }
+
         val result = auth.createUserWithEmailAndPassword(
-            email.trim(),
+            trimmedEmail,
             password
         ).await()
 
-        return checkNotNull(result.user) {
+        val user = checkNotNull(result.user) {
             "Account creation completed without a user."
-        }.uid
+        }
+        val accountEmail = checkNotNull(user.email) {
+            "The new email and password account has no email address."
+        }
+
+        return UserProfile(
+            uid = user.uid,
+            name = trimmedName,
+            email = accountEmail,
+            role = role
+        )
     }
 
     fun signOut() {

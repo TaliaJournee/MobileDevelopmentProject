@@ -3,6 +3,9 @@ package edu.ap.dakaniktochniwegsmijten.data.user
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.MetadataChanges
+import com.google.firebase.firestore.snapshots
+import kotlinx.coroutines.flow.first
 
 class UserRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -42,6 +45,17 @@ class UserRepository(
             email = email,
             role = role
         )
+    }
+
+    suspend fun awaitProfileCreation(uid: String) {
+        firestore.collection("users")
+            .document(uid)
+            .snapshots(MetadataChanges.INCLUDE)
+            .first { snapshot ->
+                snapshot.exists() &&
+                        !snapshot.metadata.isFromCache &&
+                        !snapshot.metadata.hasPendingWrites()
+            }
     }
 
     suspend fun createProfile(profile: UserProfile) {

@@ -25,4 +25,15 @@
     <string name="session_profile_missing">Je account heeft nog geen profiel.</string>
     <string name="session_retry">Opnieuw proberen</string>
     <string name="merchant_home_title">Mijn winkel</string>
+    <string name="register_title">Registreren</string>
+    <string name="register_name">Naam</string>
+    <string name="register_role">Ik registreer me als</string>
+    <string name="register_role_customer">Klant</string>
+    <string name="register_role_merchant">Handelaar</string>
+    <string name="register_error_name">Vul een naam van 1 tot 100 tekens in.</string>
+    <string name="register_error_password_short">Gebruik minstens 6 tekens voor je wachtwoord.</string>
+    <string name="register_error_email_in_use">Dit e-mailadres is al in gebruik. Log in met je bestaande account.</string>
+    <string name="register_error_weak_password">Dit wachtwoord voldoet niet aan de wachtwoordvereisten. Kies een sterker wachtwoord.</string>
+    <string name="register_error_unknown">Je account aanmaken is niet gelukt. Probeer opnieuw.</string>
+    <string name="register_error_profile_save">Je account is aangemaakt, maar je profiel kon niet worden opgeslagen. Probeer opnieuw.</string>
 </resources>

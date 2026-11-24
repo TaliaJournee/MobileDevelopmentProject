@@ -40,9 +40,11 @@ import edu.ap.dakaniktochniwegsmijten.ui.auth.LoginScreen
 import edu.ap.dakaniktochniwegsmijten.ui.auth.SessionStatusScreen
 import edu.ap.dakaniktochniwegsmijten.ui.auth.SessionViewModel
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
+import edu.ap.dakaniktochniwegsmijten.ui.auth.RegisterScreen
 
 private const val SESSION_ROUTE = "session"
 private const val LOGIN_ROUTE = "login"
+private const val REGISTER_ROUTE = "register"
 private const val MERCHANT_ROUTE = "merchant"
 
 private enum class CustomerDestination(
@@ -147,7 +149,19 @@ fun AppNavigation(
 
             composable(LOGIN_ROUTE) {
                 if (targetRoute == LOGIN_ROUTE) {
-                    LoginScreen()
+                    LoginScreen(
+                        onRegisterClick = {
+                            navController.navigate(REGISTER_ROUTE) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
+
+            composable(REGISTER_ROUTE) {
+                if (targetRoute == LOGIN_ROUTE) {
+                    RegisterScreen()
                 }
             }
 

@@ -30,9 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.ap.dakaniktochniwegsmijten.R
+import androidx.compose.material3.TextButton
 
 @Composable
 fun LoginScreen(
+    onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel()
 ) {
@@ -127,6 +129,13 @@ fun LoginScreen(
                     }
                 )
             )
+        }
+
+        TextButton(
+            onClick = onRegisterClick,
+            enabled = canEdit
+        ) {
+            Text(stringResource(R.string.register_title))
         }
 
         if (uiState.isLoading) {
