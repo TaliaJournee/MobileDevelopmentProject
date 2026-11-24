@@ -20,6 +20,46 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import edu.ap.dakaniktochniwegsmijten.R
+
+private enum class LocationAccess {
+    NONE,
+    APPROXIMATE,
+    PRECISE
+}
+
+private fun readLocationAccess(context: Context): LocationAccess {
+    val fine = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+    val coarse = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    return when {
+        fine == PackageManager.PERMISSION_GRANTED -> LocationAccess.PRECISE
+        coarse == PackageManager.PERMISSION_GRANTED -> LocationAccess.APPROXIMATE
+        else -> LocationAccess.NONE
+    }
+}
 
 @Composable
 fun MapScreen(
@@ -29,7 +69,16 @@ fun MapScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by mapViewModel.uiState.collectAsStateWithLifecycle()
+    var locationAccess by remember(context) {
+        mutableStateOf(readLocationAccess(context))
+    }
+    var hasRequestedLocation by rememberSaveable { mutableStateOf(false) }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) {
+        locationAccess = readLocationAccess(context)
+    }
     val mapView = remember(context) {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
@@ -83,7 +132,10 @@ fun MapScreen(
 
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                Lifecycle.Event.ON_RESUME -> {
+                    mapView.onResume()
+                    locationAccess = readLocationAccess(context)
+                }
                 Lifecycle.Event.ON_PAUSE -> mapView.onPause()
                 else -> Unit
             }
@@ -103,8 +155,48 @@ fun MapScreen(
         }
     }
 
-    AndroidView(
-        factory = { mapView },
-        modifier = modifier.fillMaxSize()
-    )
+    Column(modifier = modifier.fillMaxSize()) {
+        if (locationAccess == LocationAccess.NONE) {
+            Button(
+                onClick = {
+                    hasRequestedLocation = true
+                    permissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(stringResource(R.string.map_request_location))
+            }
+        }
+
+        val statusRes = when (locationAccess) {
+            LocationAccess.PRECISE -> R.string.map_location_precise
+            LocationAccess.APPROXIMATE -> R.string.map_location_approximate
+            LocationAccess.NONE -> if (hasRequestedLocation) {
+                R.string.map_location_denied
+            } else {
+                null
+            }
+        }
+
+        if (statusRes != null) {
+            Text(
+                text = stringResource(statusRes),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+
+        AndroidView(
+            factory = { mapView },
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
+    }
 }

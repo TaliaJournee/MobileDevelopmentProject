@@ -38,4 +38,8 @@
     <string name="register_error_profile_save">Je account is aangemaakt, maar je profiel kon niet worden opgeslagen. Probeer opnieuw.</string>
     <string name="register_submit">Account aanmaken</string>
     <string name="register_submitting">Account aanmaken…</string>
+    <string name="map_request_location">Locatietoegang vragen</string>
+    <string name="map_location_precise">Precieze locatie toegestaan.</string>
+    <string name="map_location_approximate">Geschatte locatie toegestaan.</string>
+    <string name="map_location_denied">Geen locatietoegang. Je kunt dit wijzigen bij de appmachtigingen in Instellingen.</string>
 </resources>
