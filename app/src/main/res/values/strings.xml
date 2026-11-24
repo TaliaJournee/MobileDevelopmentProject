@@ -42,4 +42,5 @@
     <string name="map_location_precise">Precieze locatie toegestaan.</string>
     <string name="map_location_approximate">Geschatte locatie toegestaan.</string>
     <string name="map_location_denied">Geen locatietoegang. Je kunt dit wijzigen bij de appmachtigingen in Instellingen.</string>
+    <string name="map_place_pin">Plaats pin in het midden</string>
 </resources>

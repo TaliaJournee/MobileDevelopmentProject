@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import edu.ap.dakaniktochniwegsmijten.R
+import org.osmdroid.views.overlay.Marker
 
 private enum class LocationAccess {
     NONE,
@@ -155,6 +156,27 @@ fun MapScreen(
         }
     }
 
+    val selectedLatitude = uiState.selectedLatitude
+    val selectedLongitude = uiState.selectedLongitude
+
+    if (selectedLatitude != null && selectedLongitude != null) {
+        DisposableEffect(mapView, selectedLatitude, selectedLongitude) {
+            val marker = Marker(mapView).apply {
+                position = GeoPoint(selectedLatitude, selectedLongitude)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                setOnMarkerClickListener { _, _ -> true }
+            }
+
+            mapView.overlays.add(marker)
+            mapView.invalidate()
+
+            onDispose {
+                mapView.overlays.remove(marker)
+                mapView.invalidate()
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         if (locationAccess == LocationAccess.NONE) {
             Button(
@@ -190,6 +212,18 @@ fun MapScreen(
                 text = stringResource(statusRes),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
+        }
+
+        Button(
+            onClick = {
+                val center = mapView.mapCenter
+                mapViewModel.selectLocation(center.latitude, center.longitude)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Text(stringResource(R.string.map_place_pin))
         }
 
         AndroidView(
