@@ -36,6 +36,32 @@ service cloud.firestore {
       allow list, delete: if false;
     }
 
+    match /stores/{storeId} {
+      function isStoreMerchant() {
+        return isOwner(storeId)
+          && get(/databases/$(database)/documents/users/$(storeId)).data.role == 'merchant';
+      }
+
+      function isValidStore() {
+        let data = request.resource.data;
+        let requiredFields = ['ownerId', 'name', 'category', 'location', 'address', 'city'];
+
+        return data.keys().hasAll(requiredFields)
+          && data.keys().hasOnly(requiredFields)
+          && data.ownerId == storeId
+          && data.name is string
+          && data.name.matches('.*\\S.*')
+          && data.category is string
+          && data.category.matches('.*\\S.*')
+          && data.location is latlng
+          && data.address is string
+          && data.city is string;
+      }
+
+      allow get: if isStoreMerchant();
+      allow create: if isStoreMerchant() && isValidStore();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
