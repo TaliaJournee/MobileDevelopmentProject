@@ -40,6 +40,7 @@ import edu.ap.dakaniktochniwegsmijten.R
 import org.osmdroid.views.overlay.Marker
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clipToBounds
 
 private enum class LocationAccess {
     NONE,
@@ -283,6 +284,7 @@ fun MapScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .clipToBounds()
         )
     }
 }
