@@ -46,4 +46,6 @@
     <string name="map_use_device_location">Gebruik mijn locatie</string>
     <string name="map_locating">Locatie ophalen…</string>
     <string name="map_location_unavailable">Geen toestelpositie gevonden. Probeer opnieuw of plaats zelf een pin.</string>
+    <string name="store_name_label">Winkelnaam</string>
+    <string name="store_category_label">Categorie</string>
 </resources>

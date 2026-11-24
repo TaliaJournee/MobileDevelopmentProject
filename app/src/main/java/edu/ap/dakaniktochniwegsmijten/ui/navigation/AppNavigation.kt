@@ -41,6 +41,7 @@ import edu.ap.dakaniktochniwegsmijten.ui.auth.SessionStatusScreen
 import edu.ap.dakaniktochniwegsmijten.ui.auth.SessionViewModel
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
 import edu.ap.dakaniktochniwegsmijten.ui.auth.RegisterScreen
+import edu.ap.dakaniktochniwegsmijten.ui.store.StoreScreen
 
 private const val SESSION_ROUTE = "session"
 private const val LOGIN_ROUTE = "login"
@@ -197,8 +198,7 @@ fun AppNavigation(
 
             composable(MERCHANT_ROUTE) {
                 if (isMerchantReady) {
-                    PlaceholderScreen(R.string.merchant_home_title)
-                }
+                    StoreScreen()                }
             }
         }
 
