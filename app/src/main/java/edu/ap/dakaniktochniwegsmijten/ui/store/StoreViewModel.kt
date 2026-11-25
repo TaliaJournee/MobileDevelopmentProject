@@ -17,8 +17,12 @@ import edu.ap.dakaniktochniwegsmijten.data.store.StoreAlreadyExistsException
 import edu.ap.dakaniktochniwegsmijten.data.store.StoreRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import edu.ap.dakaniktochniwegsmijten.data.store.MerchantStore
 
 data class StoreUiState(
+    val isLoadingStore: Boolean = true,
+    val storeLoadFailed: Boolean = false,
+    val existingStore: MerchantStore? = null,
     val name: String = "",
     val category: String = "",
     val address: StoreAddress? = null,
@@ -38,6 +42,37 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private var addressLookupJob: Job? = null
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState.asStateFlow()
+
+    fun loadStore(ownerId: String) {
+        _uiState.update { it.copy(isLoadingStore = true, storeLoadFailed = false) }
+
+        viewModelScope.launch {
+            try {
+                val store = storeRepository.getStore(ownerId)
+
+                _uiState.update { state ->
+                    if (store == null) {
+                        state.copy(isLoadingStore = false)
+                    } else {
+                        state.copy(
+                            isLoadingStore = false,
+                            existingStore = store,
+                            name = store.name,
+                            category = store.category,
+                            address = store.address,
+                            isRegistered = true
+                        )
+                    }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                _uiState.update {
+                    it.copy(isLoadingStore = false, storeLoadFailed = true)
+                }
+            }
+        }
+    }
 
     fun updateName(name: String) {
         _uiState.update { it.copy(name = name) }
