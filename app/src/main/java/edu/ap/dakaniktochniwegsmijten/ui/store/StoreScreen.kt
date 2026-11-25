@@ -170,7 +170,7 @@ fun StoreScreen(
                 onClick = {
                     storeViewModel.registerStore(ownerId, latitude, longitude)
                 },
-                enabled = canEdit,
+                enabled = canEdit && !uiState.isLookingUpAddress,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(

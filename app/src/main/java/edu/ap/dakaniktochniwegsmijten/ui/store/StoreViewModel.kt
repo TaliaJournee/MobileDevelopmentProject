@@ -97,10 +97,13 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun registerStore(ownerId: String, latitude: Double?, longitude: Double?) {
         val form = _uiState.value
-        if (form.isSaving || form.isRegistered) return
+        if (form.isSaving || form.isRegistered || form.isLookingUpAddress) return
 
+        val address = form.address
         if (form.name.isBlank() || form.category.isBlank() ||
-            latitude == null || longitude == null
+            latitude == null || longitude == null ||
+            address == null || address.streetAndNumber.isBlank() ||
+            address.postalCode.isBlank() || address.city.isBlank()
         ) {
             _uiState.update { it.copy(errorRes = R.string.store_incomplete) }
             return
@@ -115,7 +118,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                     name = form.name,
                     category = form.category,
                     latitude = latitude,
-                    longitude = longitude
+                    longitude = longitude,
+                    address = address
                 )
                 _uiState.update { it.copy(isSaving = false, isRegistered = true) }
             } catch (error: CancellationException) {

@@ -47,7 +47,8 @@ service cloud.firestore {
         let requiredFields = ['ownerId', 'name', 'category', 'location', 'address', 'city'];
 
         return data.keys().hasAll(requiredFields)
-          && data.keys().hasOnly(requiredFields)
+          && data.keys().hasOnly(requiredFields.concat(['postalCode']))
+	  && data.get('postalCode', '') is string
           && data.ownerId == storeId
           && data.name is string
           && data.name.matches('.*\\S.*')

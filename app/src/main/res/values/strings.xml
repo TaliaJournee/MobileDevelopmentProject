@@ -54,7 +54,7 @@
     <string name="store_register">Winkel registreren</string>
     <string name="store_saving">Winkel wordt geregistreerd…</string>
     <string name="store_registered">Je winkel is geregistreerd.</string>
-    <string name="store_incomplete">Vul een winkelnaam en categorie in en kies een locatie op de kaart.</string>
+    <string name="store_incomplete">Vul de winkelnaam, categorie en het volledige adres in en kies een locatie op de kaart.</string>
     <string name="store_already_exists">Je hebt al een winkel geregistreerd met dit account.</string>
     <string name="store_save_failed">Registreren is niet gelukt. Controleer je verbinding en probeer opnieuw.</string>
     <string name="store_street_and_number_label">Straat en huisnummer</string>
