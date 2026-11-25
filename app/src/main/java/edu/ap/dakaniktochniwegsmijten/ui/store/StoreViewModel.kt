@@ -1,6 +1,11 @@
 package edu.ap.dakaniktochniwegsmijten.ui.store
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import edu.ap.dakaniktochniwegsmijten.data.geocoding.GeocodingRepository
+import edu.ap.dakaniktochniwegsmijten.data.geocoding.StoreAddress
+import edu.ap.dakaniktochniwegsmijten.data.local.AppDatabase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,13 +21,21 @@ import kotlinx.coroutines.launch
 data class StoreUiState(
     val name: String = "",
     val category: String = "",
+    val address: StoreAddress? = null,
+    val isLookingUpAddress: Boolean = false,
+    val addressLookupFailed: Boolean = false,
     val isSaving: Boolean = false,
     val isRegistered: Boolean = false,
     @StringRes val errorRes: Int? = null
 )
 
-class StoreViewModel : ViewModel() {
+class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val storeRepository = StoreRepository()
+    private val geocodingRepository = GeocodingRepository(
+        AppDatabase.getInstance(application).cachedAddressDao()
+    )
+    private var selectedStorePin: Pair<Double, Double>? = null
+    private var addressLookupJob: Job? = null
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState.asStateFlow()
 
@@ -32,6 +45,54 @@ class StoreViewModel : ViewModel() {
 
     fun updateCategory(category: String) {
         _uiState.update { it.copy(category = category) }
+    }
+
+    fun updateAddress(change: (StoreAddress) -> StoreAddress) {
+        _uiState.update { state ->
+            if (state.isLookingUpAddress || state.isSaving || state.isRegistered) {
+                return@update state
+            }
+
+            val current = state.address ?: StoreAddress(
+                streetAndNumber = "",
+                postalCode = "",
+                city = ""
+            )
+            state.copy(address = change(current))
+        }
+    }
+
+    fun onStorePinSelected(latitude: Double, longitude: Double) {
+        val pin = latitude to longitude
+        if (_uiState.value.isRegistered || selectedStorePin == pin) return
+
+        selectedStorePin = pin
+        addressLookupJob?.cancel()
+        _uiState.update {
+            it.copy(
+                address = null,
+                isLookingUpAddress = true,
+                addressLookupFailed = false
+            )
+        }
+
+        addressLookupJob = viewModelScope.launch {
+            val address = try {
+                geocodingRepository.findStoreAddress(latitude, longitude)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                null
+            }
+
+            _uiState.update {
+                it.copy(
+                    address = address,
+                    isLookingUpAddress = false,
+                    addressLookupFailed = address == null
+                )
+            }
+        }
     }
 
     fun registerStore(ownerId: String, latitude: Double?, longitude: Double?) {

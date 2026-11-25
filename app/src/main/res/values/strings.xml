@@ -57,4 +57,9 @@
     <string name="store_incomplete">Vul een winkelnaam en categorie in en kies een locatie op de kaart.</string>
     <string name="store_already_exists">Je hebt al een winkel geregistreerd met dit account.</string>
     <string name="store_save_failed">Registreren is niet gelukt. Controleer je verbinding en probeer opnieuw.</string>
+    <string name="store_street_and_number_label">Straat en huisnummer</string>
+    <string name="store_postal_code_label">Postcode</string>
+    <string name="store_city_label">Gemeente</string>
+    <string name="store_address_loading">Adres wordt opgezocht…</string>
+    <string name="store_address_lookup_failed">Het adres kon niet automatisch worden ingevuld. Vul het hieronder zelf in.</string>
 </resources>

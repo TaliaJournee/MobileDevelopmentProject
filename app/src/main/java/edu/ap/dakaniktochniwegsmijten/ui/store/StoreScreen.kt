@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapViewModel
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun StoreScreen(
@@ -36,10 +37,20 @@ fun StoreScreen(
     mapViewModel: MapViewModel = viewModel()
 ) {
     val uiState by storeViewModel.uiState.collectAsStateWithLifecycle()
+    val mapUiState by mapViewModel.uiState.collectAsStateWithLifecycle()
     var isChoosingLocation by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = isChoosingLocation) {
         isChoosingLocation = false
+    }
+
+    val latitude = mapUiState.selectedLatitude
+    val longitude = mapUiState.selectedLongitude
+
+    LaunchedEffect(latitude, longitude) {
+        if (latitude != null && longitude != null) {
+            storeViewModel.onStorePinSelected(latitude, longitude)
+        }
     }
 
     if (isChoosingLocation) {
@@ -56,7 +67,6 @@ fun StoreScreen(
         return
     }
 
-    val mapUiState by mapViewModel.uiState.collectAsStateWithLifecycle()
     val canEdit = !uiState.isSaving && !uiState.isRegistered
 
     Column(
@@ -89,9 +99,6 @@ fun StoreScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        val latitude = mapUiState.selectedLatitude
-        val longitude = mapUiState.selectedLongitude
-
         if (latitude != null && longitude != null) {
             Text(
                 text = stringResource(
@@ -107,6 +114,53 @@ fun StoreScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.store_choose_location))
+        }
+
+        if (latitude != null && longitude != null) {
+            if (uiState.isLookingUpAddress) {
+                Text(stringResource(R.string.store_address_loading))
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            if (uiState.addressLookupFailed) {
+                Text(stringResource(R.string.store_address_lookup_failed))
+            }
+
+            val address = uiState.address
+            val canEditAddress = canEdit && !uiState.isLookingUpAddress
+
+            OutlinedTextField(
+                value = address?.streetAndNumber.orEmpty(),
+                onValueChange = { value ->
+                    storeViewModel.updateAddress { it.copy(streetAndNumber = value) }
+                },
+                label = { Text(stringResource(R.string.store_street_and_number_label)) },
+                singleLine = true,
+                enabled = canEditAddress,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = address?.postalCode.orEmpty(),
+                onValueChange = { value ->
+                    storeViewModel.updateAddress { it.copy(postalCode = value) }
+                },
+                label = { Text(stringResource(R.string.store_postal_code_label)) },
+                singleLine = true,
+                enabled = canEditAddress,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = address?.city.orEmpty(),
+                onValueChange = { value ->
+                    storeViewModel.updateAddress { it.copy(city = value) }
+                },
+                label = { Text(stringResource(R.string.store_city_label)) },
+                singleLine = true,
+                enabled = canEditAddress,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         if (uiState.isRegistered) {
