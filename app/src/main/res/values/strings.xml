@@ -65,4 +65,5 @@
     <string name="store_loading">Winkelgegevens worden geladen…</string>
     <string name="store_load_failed">Je winkelgegevens konden niet worden geladen.</string>
     <string name="store_retry_loading">Opnieuw proberen</string>
+    <string name="store_view_location">Bekijk winkellocatie op de kaart</string>
 </resources>

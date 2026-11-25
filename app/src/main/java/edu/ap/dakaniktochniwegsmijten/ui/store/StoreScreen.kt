@@ -28,24 +28,67 @@ import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapViewModel
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
+import org.osmdroid.util.GeoPoint
 
 @Composable
 fun StoreScreen(
     ownerId: String,
     modifier: Modifier = Modifier,
-    storeViewModel: StoreViewModel = viewModel(),
-    mapViewModel: MapViewModel = viewModel()
+    storeViewModel: StoreViewModel = viewModel(key = "store-$ownerId"),
+    mapViewModel: MapViewModel = viewModel(key = "store-map-$ownerId")
 ) {
     val uiState by storeViewModel.uiState.collectAsStateWithLifecycle()
     val mapUiState by mapViewModel.uiState.collectAsStateWithLifecycle()
-    var isChoosingLocation by rememberSaveable { mutableStateOf(false) }
+    var isChoosingLocation by rememberSaveable(ownerId) { mutableStateOf(false) }
+    var loadAttempt by rememberSaveable(ownerId) { mutableStateOf(0) }
+
+    LaunchedEffect(ownerId, loadAttempt) {
+        if (storeViewModel.uiState.value.isLoadingStore ||
+            storeViewModel.uiState.value.storeLoadFailed
+        ) {
+            storeViewModel.loadStore(ownerId)
+        }
+    }
+
+    if (uiState.isLoadingStore || uiState.storeLoadFailed) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (uiState.isLoadingStore) {
+                Text(stringResource(R.string.store_loading))
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            } else {
+                Text(stringResource(R.string.store_load_failed))
+                Button(onClick = { loadAttempt++ }) {
+                    Text(stringResource(R.string.session_retry))
+                }
+            }
+        }
+        return
+    }
 
     BackHandler(enabled = isChoosingLocation) {
         isChoosingLocation = false
     }
 
-    val latitude = mapUiState.selectedLatitude
-    val longitude = mapUiState.selectedLongitude
+    val latitude = if (uiState.isRegistered) {
+        uiState.registeredLatitude
+    } else {
+        mapUiState.selectedLatitude
+    }
+
+    val longitude = if (uiState.isRegistered) {
+        uiState.registeredLongitude
+    } else {
+        mapUiState.selectedLongitude
+    }
+
+    LaunchedEffect(latitude, longitude, uiState.isRegistered) {
+        if (!uiState.isRegistered && latitude != null && longitude != null) {
+            storeViewModel.onStorePinSelected(latitude, longitude)
+        }
+    }
 
     LaunchedEffect(latitude, longitude) {
         if (latitude != null && longitude != null) {
@@ -61,7 +104,12 @@ fun StoreScreen(
 
             MapScreen(
                 modifier = Modifier.weight(1f),
-                mapViewModel = mapViewModel
+                mapViewModel = mapViewModel,
+                fixedPin = if (uiState.isRegistered && latitude != null && longitude != null) {
+                    GeoPoint(latitude, longitude)
+                } else {
+                    null
+                }
             )
         }
         return
@@ -111,9 +159,15 @@ fun StoreScreen(
 
         Button(
             onClick = { isChoosingLocation = true },
+            enabled = !uiState.isSaving,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.store_choose_location))
+            Text(
+                stringResource(
+                    if (uiState.isRegistered) R.string.store_view_location
+                    else R.string.store_choose_location
+                )
+            )
         }
 
         if (latitude != null && longitude != null) {

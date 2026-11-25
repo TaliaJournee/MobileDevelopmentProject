@@ -68,7 +68,8 @@ private fun readLocationAccess(context: Context): LocationAccess {
 @Composable
 fun MapScreen(
     modifier: Modifier = Modifier,
-    mapViewModel: MapViewModel = viewModel()
+    mapViewModel: MapViewModel = viewModel(),
+    fixedPin: GeoPoint? = null
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -89,9 +90,7 @@ fun MapScreen(
             setMultiTouchControls(true)
 
             controller.setZoom(uiState.zoom)
-            controller.setCenter(
-                GeoPoint(uiState.latitude, uiState.longitude)
-            )
+            controller.setCenter(fixedPin ?: GeoPoint(uiState.latitude, uiState.longitude))
 
             overlays.add(CopyrightOverlay(context))
         }
@@ -159,8 +158,8 @@ fun MapScreen(
         }
     }
 
-    val selectedLatitude = uiState.selectedLatitude
-    val selectedLongitude = uiState.selectedLongitude
+    val selectedLatitude = fixedPin?.latitude ?: uiState.selectedLatitude
+    val selectedLongitude = fixedPin?.longitude ?: uiState.selectedLongitude
 
     LaunchedEffect(
         mapView,
@@ -196,6 +195,7 @@ fun MapScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
+        if (fixedPin == null) {
         if (locationAccess == LocationAccess.NONE) {
             Button(
                 onClick = {
@@ -277,6 +277,7 @@ fun MapScreen(
                 .padding(horizontal = 16.dp)
         ) {
             Text(stringResource(R.string.map_place_pin))
+          }
         }
 
         AndroidView(

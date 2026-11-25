@@ -30,6 +30,8 @@ data class StoreUiState(
     val addressLookupFailed: Boolean = false,
     val isSaving: Boolean = false,
     val isRegistered: Boolean = false,
+    val registeredLatitude: Double? = null,
+    val registeredLongitude: Double? = null,
     @StringRes val errorRes: Int? = null
 )
 
@@ -60,6 +62,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                             name = store.name,
                             category = store.category,
                             address = store.address,
+                            registeredLatitude = store.latitude,
+                            registeredLongitude = store.longitude,
                             isRegistered = true
                         )
                     }
@@ -156,7 +160,14 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                     longitude = longitude,
                     address = address
                 )
-                _uiState.update { it.copy(isSaving = false, isRegistered = true) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        isRegistered = true,
+                        registeredLatitude = latitude,
+                        registeredLongitude = longitude
+                    )
+                }
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
