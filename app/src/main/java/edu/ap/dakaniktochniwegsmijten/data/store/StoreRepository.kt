@@ -4,6 +4,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.tasks.await
 
+class StoreAlreadyExistsException : Exception("The merchant already has a store.")
+
 class StoreRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
@@ -32,9 +34,17 @@ class StoreRepository(
             "city" to ""
         )
 
-        firestore.collection("stores")
-            .document(ownerId)
-            .set(store)
-            .await()
+        val storeDocument = firestore.collection("stores").document(ownerId)
+
+        firestore.runTransaction { transaction ->
+            val existingStore = transaction.get(storeDocument)
+
+            if (existingStore.exists()) {
+                throw StoreAlreadyExistsException()
+            }
+
+            transaction.set(storeDocument, store)
+            Unit
+        }.await()
     }
 }
