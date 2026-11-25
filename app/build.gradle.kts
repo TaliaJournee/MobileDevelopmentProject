@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.gson)
+    implementation(libs.androidx.room.runtime)
 }
