@@ -197,8 +197,11 @@ fun AppNavigation(
             }
 
             composable(MERCHANT_ROUTE) {
-                if (isMerchantReady) {
-                    StoreScreen()                }
+                val ownerId = sessionState.userId
+
+                if (isMerchantReady && ownerId != null) {
+                    StoreScreen(ownerId = ownerId)
+                }
             }
         }
 

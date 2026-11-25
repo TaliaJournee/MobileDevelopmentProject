@@ -26,9 +26,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapScreen
 import edu.ap.dakaniktochniwegsmijten.ui.map.MapViewModel
+import androidx.compose.material3.LinearProgressIndicator
 
 @Composable
 fun StoreScreen(
+    ownerId: String,
     modifier: Modifier = Modifier,
     storeViewModel: StoreViewModel = viewModel(),
     mapViewModel: MapViewModel = viewModel()
@@ -55,6 +57,7 @@ fun StoreScreen(
     }
 
     val mapUiState by mapViewModel.uiState.collectAsStateWithLifecycle()
+    val canEdit = !uiState.isSaving && !uiState.isRegistered
 
     Column(
         modifier = modifier
@@ -73,6 +76,7 @@ fun StoreScreen(
             onValueChange = storeViewModel::updateName,
             label = { Text(stringResource(R.string.store_name_label)) },
             singleLine = true,
+            enabled = canEdit,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -81,6 +85,7 @@ fun StoreScreen(
             onValueChange = storeViewModel::updateCategory,
             label = { Text(stringResource(R.string.store_category_label)) },
             singleLine = true,
+            enabled = canEdit,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -102,6 +107,36 @@ fun StoreScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.store_choose_location))
+        }
+
+        if (uiState.isRegistered) {
+            Text(stringResource(R.string.store_registered))
+        } else {
+            Button(
+                onClick = {
+                    storeViewModel.registerStore(ownerId, latitude, longitude)
+                },
+                enabled = canEdit,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    stringResource(
+                        if (uiState.isSaving) R.string.store_saving
+                        else R.string.store_register
+                    )
+                )
+            }
+        }
+
+        if (uiState.isSaving) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        uiState.errorRes?.let { message ->
+            Text(
+                text = stringResource(message),
+                color = MaterialTheme.colorScheme.error
+            )
         }
     }
 }
